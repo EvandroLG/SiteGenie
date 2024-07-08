@@ -1,6 +1,6 @@
 import unittest
-from inline_markdown import split_nodes_delimiter, split_nodes_image, extract_markdown_images, extract_markdown_links
-from textnode import TextNode, text_type_text, text_type_bold, text_type_image
+from inline_markdown import split_nodes_delimiter, split_nodes_image, split_nodes_link, extract_markdown_images, extract_markdown_links
+from textnode import TextNode, text_type_text, text_type_bold, text_type_image, text_type_link
 
 class TestInlineMarkdown(unittest.TestCase):
     def test_delimit_bold(self):
@@ -65,6 +65,29 @@ class TestInlineMarkdown(unittest.TestCase):
             TextNode(" and ", text_type_text),
             TextNode("Alt text", text_type_image, "https://www.example.com/image.png")
         ], split_nodes_image([node3]))
+
+    def test_split_nodes_link(self):
+        node1 = TextNode("Hello is text with [Link text](https://www.example.com)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Link text", text_type_link, "https://www.example.com")
+        ], split_nodes_link([node1]))
+
+        node2 = TextNode("Hello is text with [Link text 1](https://www.example.com) [Link text 2](https://www.example.com)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Link text 1", text_type_link, "https://www.example.com"),
+            TextNode(" ", text_type_text),
+            TextNode("Link text 2", text_type_link, "https://www.example.com")
+        ], split_nodes_link([node2]))
+
+        node3 = TextNode("Hello is text with [Link text](https://www.example.com) and [Link text](https://www.example.com)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Link text", text_type_link, "https://www.example.com"),
+            TextNode(" and ", text_type_text),
+            TextNode("Link text", text_type_link, "https://www.example.com")
+        ], split_nodes_link([node3]))
 
 if __name__ == "__main__":
     unittest.main()
