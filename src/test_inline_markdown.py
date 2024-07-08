@@ -1,11 +1,11 @@
 import unittest
-from inline_markdown import split_node_delimiter, extract_markdown_images, extract_markdown_links
-from textnode import TextNode, text_type_text, text_type_bold
+from inline_markdown import split_nodes_delimiter, split_nodes_image, extract_markdown_images, extract_markdown_links
+from textnode import TextNode, text_type_text, text_type_bold, text_type_image
 
 class TestInlineMarkdown(unittest.TestCase):
     def test_delimit_bold(self):
         node = TextNode("Hello is text with **bolded** word", text_type_text)
-        new_nodes = split_node_delimiter([node], "**", text_type_bold)
+        new_nodes = split_nodes_delimiter([node], "**", text_type_bold)
         self.assertListEqual([
             TextNode("Hello is text with ", text_type_text),
             TextNode("bolded", text_type_bold),
@@ -15,7 +15,7 @@ class TestInlineMarkdown(unittest.TestCase):
     def test_delimit_invalid(self):
         node = TextNode("Hello is text with **bolded word", text_type_text)
         with self.assertRaisesRegex(ValueError, 'Invalid markdown'):
-            split_node_delimiter([node], "**", text_type_bold)
+            split_nodes_delimiter([node], "**", text_type_bold)
 
     def test_extract_markdown_images(self):
         text1 = "![Alt text](https://www.example.com/image.png)"
@@ -42,6 +42,29 @@ class TestInlineMarkdown(unittest.TestCase):
 
         text3 = "This is just a text ![Alt text](https://www.example.com/image.png)"
         self.assertListEqual([], extract_markdown_links(text3))
+
+    def test_split_nodes_image(self):
+        node1 = TextNode("Hello is text with ![Alt text](https://www.example.com/image.png)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Alt text", text_type_image, "https://www.example.com/image.png")
+        ], split_nodes_image([node1]))
+
+        node2 = TextNode("Hello is text with ![Alt text 1](https://www.example.com/image1.png) ![Alt text 2](https://www.example.com/image2.png)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Alt text 1", text_type_image, "https://www.example.com/image1.png"),
+            TextNode(" ", text_type_text),
+            TextNode("Alt text 2", text_type_image, "https://www.example.com/image2.png")
+        ], split_nodes_image([node2]))
+
+        node3 = TextNode("Hello is text with ![Alt text](https://www.example.com/image.png) and ![Alt text](https://www.example.com/image.png)", text_type_text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Alt text", text_type_image, "https://www.example.com/image.png"),
+            TextNode(" and ", text_type_text),
+            TextNode("Alt text", text_type_image, "https://www.example.com/image.png")
+        ], split_nodes_image([node3]))
 
 if __name__ == "__main__":
     unittest.main()

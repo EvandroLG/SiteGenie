@@ -21,5 +21,6 @@ class TestTextNode(unittest.TestCase):
         italic = TextNode("Hello", "italic", None)
         self.assertEqual(italic.to_html_node().to_html(), '<i>Hello</i>')
 
+
 if __name__ == "__main__":
     unittest.main()
