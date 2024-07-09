@@ -1,6 +1,21 @@
 import unittest
-from inline_markdown import split_nodes_delimiter, split_nodes_image, split_nodes_link, extract_markdown_images, extract_markdown_links
-from textnode import TextNode, text_type_text, text_type_bold, text_type_image, text_type_link
+
+from inline_markdown import (
+    split_nodes_delimiter,
+    split_nodes_image,
+    split_nodes_link,
+    extract_markdown_images,
+    extract_markdown_links,
+    text_to_textnodes
+)
+
+from textnode import  (
+    TextNode,
+    text_type_text,
+    text_type_bold,
+    text_type_image,
+    text_type_link
+)
 
 class TestInlineMarkdown(unittest.TestCase):
     def test_delimit_bold(self):
@@ -88,6 +103,16 @@ class TestInlineMarkdown(unittest.TestCase):
             TextNode(" and ", text_type_text),
             TextNode("Link text", text_type_link, "https://www.example.com")
         ], split_nodes_link([node3]))
+
+    def test_text_to_textnodes(self):
+        text = "Hello is text with ![Alt text](https://www.example.com/image.png) and [Link text](https://www.example.com)"
+        nodes = text_to_textnodes(text)
+        self.assertListEqual([
+            TextNode("Hello is text with ", text_type_text),
+            TextNode("Alt text", text_type_image, "https://www.example.com/image.png"),
+            TextNode(" and ", text_type_text),
+            TextNode("Link text", text_type_link, "https://www.example.com")
+        ], nodes)
 
 if __name__ == "__main__":
     unittest.main()
