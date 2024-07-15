@@ -105,3 +105,11 @@ def extract_markdown_images(text):
 
 def extract_markdown_links(text):
     return re.findall(r"(?<!!)\[([^\]]+)\]\(([^)]+)\)", text)
+
+def extract_title(markdown):
+    title = re.search(r"^#\s+(.+)$", markdown, re.MULTILINE)
+
+    if not title:
+        raise ValueError("Title not found")
+
+    return title.group(1)

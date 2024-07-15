@@ -6,6 +6,7 @@ from inline_markdown import (
     split_nodes_link,
     extract_markdown_images,
     extract_markdown_links,
+    extract_title,
     text_to_textnodes
 )
 
@@ -113,6 +114,15 @@ class TestInlineMarkdown(unittest.TestCase):
             TextNode(" and ", text_type_text),
             TextNode("Link text", text_type_link, "https://www.example.com")
         ], nodes)
+
+    def test_extract_title(self):
+        text1 = "# This is a heading"
+        self.assertEqual("This is a heading", extract_title(text1))
+
+        text2 = """# This is a heading
+        ## Introduction
+        This is a simple markdown file."""
+        self.assertEqual("This is a heading", extract_title(text2))
 
 if __name__ == "__main__":
     unittest.main()
