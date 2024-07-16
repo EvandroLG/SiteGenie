@@ -9,8 +9,9 @@ from markdown_blocks import (
     block_type_unordered_list,
     block_type_ordered_list,
     block_type_paragraph,
-    markdown_to_html_node
+    markdown_to_html_node,
 )
+
 
 class TestMarkdownBlocks(unittest.TestCase):
     def test_markdown_to_block(self):
@@ -24,13 +25,16 @@ class TestMarkdownBlocks(unittest.TestCase):
 
         blocks = markdown_to_block(markdown)
 
-        self.assertListEqual([
-            "This is **bolded** paragraph",
-            "This is another paragraph with *italic* text and `code` here",
-            "This is the same paragraph on a new line",
-            "* This is a list",
-            "* with items"
-        ], blocks)
+        self.assertListEqual(
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with *italic* text and `code` here",
+                "This is the same paragraph on a new line",
+                "* This is a list",
+                "* with items",
+            ],
+            blocks,
+        )
 
     def test_block_type_heading(self):
         block = "# This is a heading"
@@ -111,7 +115,9 @@ class TestMarkdownBlocks(unittest.TestCase):
 
         self.assertEqual(html_node.children[2].tag, "code")
         self.assertEqual(html_node.children[2].children[0].tag, "pre")
-        self.assertEqual(html_node.children[2].children[0].value, "print(\"Hello, World!\")")
+        self.assertEqual(
+            html_node.children[2].children[0].value, 'print("Hello, World!")'
+        )
 
         self.assertEqual(html_node.children[3].tag, "blockquote")
         self.assertEqual(html_node.children[3].value, "This is a quota")

@@ -10,7 +10,18 @@ block_type_quota = "quota"
 block_type_unordered_list = "unordered_list"
 block_type_ordered_list = "ordered_list"
 
+
 def markdown_to_block(markdown):
+    """
+    Splits a markdown string into individual blocks based on newlines.
+
+    Args:
+        markdown (str): The input markdown string.
+
+    Returns:
+        list: A list of blocks (strings) from the markdown.
+    """
+
     fragments = markdown.split("\n")
     blocks = []
 
@@ -20,10 +31,19 @@ def markdown_to_block(markdown):
 
         blocks.append(fragment.strip())
 
-
     return blocks
 
+
 def block_to_block_type(block):
+    """
+    Determines the type of a block of text based on its content.
+
+    Args:
+        block (str): The block of text.
+
+    Returns:
+        str: The type of the block.
+    """
     if re.match(r"^\s*#{1,6}\s", block):
         return block_type_heading
 
@@ -41,6 +61,7 @@ def block_to_block_type(block):
 
     return block_type_paragraph
 
+
 def markdown_to_html_node(markdown):
     blocks = markdown_to_block(markdown)
     root = HTMLNode(tag="div", children=[])
@@ -52,26 +73,41 @@ def markdown_to_html_node(markdown):
 
         if block_type == block_type_heading:
             heading_level = len(re.match(r"^\s*#{1,6}\s", block).group(0).strip())
-            block_node = HTMLNode(tag=f"h{heading_level}", value=re.sub(r"^\s*#{1,6}\s", "", block))
+            block_node = HTMLNode(
+                tag=f"h{heading_level}", value=re.sub(r"^\s*#{1,6}\s", "", block)
+            )
         elif block_type == block_type_code:
-            block_node = HTMLNode(tag="code", children=[HTMLNode(tag="pre", value=re.sub(r"```", "", block))])
+            block_node = HTMLNode(
+                tag="code",
+                children=[HTMLNode(tag="pre", value=re.sub(r"```", "", block))],
+            )
         elif block_type == block_type_quota:
             block_node = HTMLNode(tag="blockquote", value=re.sub(r"^>\s", "", block))
         elif block_type == block_type_unordered_list:
             block_node = HTMLNode(tag="ul", children=[])
 
-            while i < len(blocks) and block_to_block_type(blocks[i]) == block_type_unordered_list:
+            while (
+                i < len(blocks)
+                and block_to_block_type(blocks[i]) == block_type_unordered_list
+            ):
                 line = blocks[i]
-                block_node.children.append(HTMLNode(tag="li", value=re.sub(r"^[*-]\s", "", line)))
+                block_node.children.append(
+                    HTMLNode(tag="li", value=re.sub(r"^[*-]\s", "", line))
+                )
                 i += 1
 
             i -= 1
         elif block_type == block_type_ordered_list:
             block_node = HTMLNode(tag="ol", children=[])
 
-            while i < len(blocks) and block_to_block_type(blocks[i]) == block_type_ordered_list:
+            while (
+                i < len(blocks)
+                and block_to_block_type(blocks[i]) == block_type_ordered_list
+            ):
                 line = blocks[i]
-                block_node.children.append(HTMLNode(tag="li", value=re.sub(r"^\d+\.\s", "", line)))
+                block_node.children.append(
+                    HTMLNode(tag="li", value=re.sub(r"^\d+\.\s", "", line))
+                )
                 i += 1
 
             i -= 1
