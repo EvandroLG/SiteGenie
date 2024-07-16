@@ -1,3 +1,10 @@
+.PYTHON: all install lint run test
+
+all: install lint run test
+
+install:
+	pip install -r requirements.txt
+
 lint:
 	flake8 src
 
