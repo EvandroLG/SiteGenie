@@ -1,8 +1,8 @@
 # SiteGenie
 
 `SiteGenie` is a simple and efficient static site generator that converts
- markdown files into a static HTML page. It's perfect for creating documentation
-, blogs, or any static content website.
+ markdown files into a static HTML page. It's perfect for creating documentation,
+ blogs, or any static content website.
 
 ## Features
 
