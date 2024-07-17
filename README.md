@@ -1,4 +1,4 @@
-# SiteGenie
+# SiteGenie &middot; [![license](https://badgen.now.sh/badge/license/MIT)](./LICENSE)
 
 `SiteGenie` is a simple and efficient static site generator that converts
  markdown files into a static HTML page. It's perfect for creating documentation,
