@@ -16,6 +16,7 @@ from textnode import (
     text_type_bold,
     text_type_image,
     text_type_link,
+    text_type_italic,
 )
 
 
@@ -166,11 +167,15 @@ class TestInlineMarkdown(unittest.TestCase):
         )
 
     def test_text_to_textnodes(self):
-        text = "Hello is text with ![Alt text](https://www.example.com/image.png) and [Link text](https://www.example.com)"
+        text = "Hello *is* **text with** ![Alt text](https://www.example.com/image.png) and [Link text](https://www.example.com)"
         nodes = text_to_textnodes(text)
         self.assertListEqual(
             [
-                TextNode("Hello is text with ", text_type_text),
+                TextNode("Hello ", text_type_text),
+                TextNode("is", text_type_italic),
+                TextNode(" ", text_type_text),
+                TextNode("text with", text_type_bold),
+                TextNode(" ", text_type_text),
                 TextNode(
                     "Alt text", text_type_image, "https://www.example.com/image.png"
                 ),

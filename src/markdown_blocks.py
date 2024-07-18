@@ -44,6 +44,7 @@ def block_to_block_type(block):
     Returns:
         str: The type of the block.
     """
+
     if re.match(r"^\s*#{1,6}\s", block):
         return block_type_heading
 
