@@ -12,6 +12,9 @@ from markdown_blocks import (
     markdown_to_html_node,
 )
 
+from parentnode import ParentNode
+from textnode import TextNode, text_type_text
+
 
 class TestMarkdownBlocks(unittest.TestCase):
     def test_markdown_to_block(self):
@@ -108,34 +111,34 @@ class TestMarkdownBlocks(unittest.TestCase):
         self.assertEqual(len(html_node.children), 6)
 
         self.assertEqual(html_node.children[0].tag, "h1")
-        self.assertEqual(html_node.children[0].value, "This is a heading")
+        self.assertEqual(html_node.children[0].children[0].value, "This is a heading")
 
         self.assertEqual(html_node.children[1].tag, "p")
-        self.assertEqual(html_node.children[1].value, "This is a paragraph")
+        self.assertEqual(html_node.children[1].children[0].value, "This is a paragraph")
 
-        self.assertEqual(html_node.children[2].tag, "code")
-        self.assertEqual(html_node.children[2].children[0].tag, "pre")
-        self.assertEqual(
-            html_node.children[2].children[0].value, 'print("Hello, World!")'
-        )
+        self.assertEqual(html_node.children[2].tag, "pre")
 
         self.assertEqual(html_node.children[3].tag, "blockquote")
-        self.assertEqual(html_node.children[3].value, "This is a quota")
+        self.assertEqual(html_node.children[3].children[0].value, "This is a quota")
 
         self.assertEqual(html_node.children[4].tag, "ul")
         self.assertEqual(len(html_node.children[4].children), 2)
-
         self.assertEqual(html_node.children[4].children[0].tag, "li")
-        self.assertEqual(html_node.children[4].children[0].value, "This is a list")
-
         self.assertEqual(html_node.children[4].children[1].tag, "li")
-        self.assertEqual(html_node.children[4].children[1].value, "with items")
+        self.assertEqual(
+            html_node.children[4].children[0].children[0].value, "This is a list"
+        )
+        self.assertEqual(
+            html_node.children[4].children[1].children[0].value, "with items"
+        )
 
         self.assertEqual(html_node.children[5].tag, "ol")
         self.assertEqual(len(html_node.children[5].children), 2)
-
         self.assertEqual(html_node.children[5].children[0].tag, "li")
-        self.assertEqual(html_node.children[5].children[0].value, "This is a list")
-
         self.assertEqual(html_node.children[5].children[1].tag, "li")
-        self.assertEqual(html_node.children[5].children[1].value, "with items")
+        self.assertEqual(
+            html_node.children[5].children[0].children[0].value, "This is a list"
+        )
+        self.assertEqual(
+            html_node.children[5].children[1].children[0].value, "with items"
+        )

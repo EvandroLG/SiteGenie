@@ -8,11 +8,11 @@ class ParentNode(HTMLNode):
 
     Attributes:
         children (list): A list of child HTMLNode objects.
-        tag (str, optional): The tag name of the HTML element (e.g., 'div', 'ul'). Defaults to None.
+        tag (str): The tag name of the HTML element (e.g., 'div', 'ul').
         props (dict, optional): A dictionary of HTML attributes and their values. Defaults to None.
     """
 
-    def __init__(self, children, tag=None, props=None):
+    def __init__(self, tag, children, props=None):
         """
         Initializes a ParentNode instance with the given children, tag, and properties.
 
