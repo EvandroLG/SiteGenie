@@ -12,9 +12,6 @@ from markdown_blocks import (
     markdown_to_html_node,
 )
 
-from parentnode import ParentNode
-from textnode import TextNode, text_type_text
-
 
 class TestMarkdownBlocks(unittest.TestCase):
     def test_markdown_to_block(self):
