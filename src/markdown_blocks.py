@@ -1,7 +1,7 @@
 import re
 
-from htmlnode import HTMLNode
-
+from inline_markdown import text_to_textnodes
+from parentnode import ParentNode
 
 block_type_paragraph = "paragraph"
 block_type_heading = "heading"
@@ -64,58 +64,187 @@ def block_to_block_type(block):
 
 
 def markdown_to_html_node(markdown):
+    """
+    Converts markdown text to a hierarchical structure of HTML nodes.
+
+    Args:
+        markdown (str): The markdown text to be converted.
+
+    Returns:
+        ParentNode: The root node containing the HTML structure.
+    """
+
     blocks = markdown_to_block(markdown)
-    root = HTMLNode(tag="div", children=[])
     i = 0
+    children = []
 
     while i < len(blocks):
         block = blocks[i]
         block_type = block_to_block_type(block)
 
-        if block_type == block_type_heading:
-            heading_level = len(re.match(r"^\s*#{1,6}\s", block).group(0).strip())
-            block_node = HTMLNode(
-                tag=f"h{heading_level}", value=re.sub(r"^\s*#{1,6}\s", "", block)
-            )
+        if block_type == block_type_paragraph:
+            children.append(paragraph_to_html_node(block))
+        elif block_type == block_type_heading:
+            children.append(heading_to_html_node(block))
         elif block_type == block_type_code:
-            block_node = HTMLNode(
-                tag="code",
-                children=[HTMLNode(tag="pre", value=re.sub(r"```", "", block))],
-            )
+            children.append(code_to_html_node(block))
         elif block_type == block_type_quota:
-            block_node = HTMLNode(tag="blockquote", value=re.sub(r"^>\s", "", block))
+            children.append(quote_to_html_node(block))
         elif block_type == block_type_unordered_list:
-            block_node = HTMLNode(tag="ul", children=[])
-
-            while (
-                i < len(blocks)
-                and block_to_block_type(blocks[i]) == block_type_unordered_list
-            ):
-                line = blocks[i]
-                block_node.children.append(
-                    HTMLNode(tag="li", value=re.sub(r"^[*-]\s", "", line))
-                )
-                i += 1
-
-            i -= 1
+            i, ul = ul_to_html_node(i, blocks)
+            children.append(ul)
         elif block_type == block_type_ordered_list:
-            block_node = HTMLNode(tag="ol", children=[])
-
-            while (
-                i < len(blocks)
-                and block_to_block_type(blocks[i]) == block_type_ordered_list
-            ):
-                line = blocks[i]
-                block_node.children.append(
-                    HTMLNode(tag="li", value=re.sub(r"^\d+\.\s", "", line))
-                )
-                i += 1
-
-            i -= 1
-        else:
-            block_node = HTMLNode(tag="p", value=block)
+            i, ol = ol_to_html_node(i, blocks)
+            children.append(ol)
 
         i += 1
-        root.children.append(block_node)
 
-    return root
+    return ParentNode("div", children)
+
+
+def text_to_children(text):
+    """
+    Converts plain text into a list of HTML text node children.
+
+    Args:
+        text (str): The text to be converted.
+
+    Returns:
+        list: A list of HTML nodes representing the text.
+    """
+
+    text_nodes = text_to_textnodes(text)
+    children = []
+
+    for text_node in text_nodes:
+        children.append(text_node.to_html_node())
+
+    return children
+
+
+def ol_to_html_node(i, blocks):
+    """
+    Converts ordered list blocks into an HTML ordered list node.
+
+    Args:
+        i (int): The current index in the list of blocks.
+        blocks (list): The list of markdown blocks.
+
+    Returns:
+        tuple: The updated index and the HTML node representing the ordered list.
+    """
+
+    html_elements = []
+    pattern = re.compile(r"^\d+\.\s")
+
+    while i < len(blocks) and pattern.match(blocks[i]):
+        block = blocks[i]
+        children = text_to_children(block[2:].strip())
+        li = ParentNode("li", children)
+        html_elements.append(li)
+        i += 1
+
+    i -= 1
+    return (i, ParentNode("ol", html_elements))
+
+
+def ul_to_html_node(i, blocks):
+    """
+    Converts unordered list blocks into an HTML unordered list node.
+
+    Args:
+        i (int): The current index in the list of blocks.
+        blocks (list): The list of markdown blocks.
+
+    Returns:
+        tuple: The updated index and the HTML node representing the unordered list.
+    """
+
+    html_elements = []
+    pattern = re.compile(r"^[*]\s")
+
+    while i < len(blocks) and pattern.match(blocks[i]):
+        block = blocks[i]
+        children = text_to_children(block[2:].strip())
+        li = ParentNode("li", children)
+        html_elements.append(li)
+        i += 1
+
+    i -= 1
+    return (i, ParentNode("ul", html_elements))
+
+
+def quote_to_html_node(block):
+    """
+    Converts a blockquote block into an HTML blockquote node.
+
+    Args:
+        block (str): The markdown block representing the blockquote.
+
+    Returns:
+        ParentNode: The HTML node representing the blockquote.
+    """
+
+    fragments = block.split("\n")
+    lines = []
+
+    for fragment in fragments:
+        if not fragment.startswith(">"):
+            raise ValueError("Invalid markdown")
+
+        lines.append(fragment[1:].strip())
+
+    content = " ".join(lines)
+    children = text_to_children(content)
+    return ParentNode("blockquote", children)
+
+
+def code_to_html_node(block):
+    """
+    Converts a code block into an HTML pre/code node.
+
+    Args:
+        block (str): The markdown block representing the code.
+
+    Returns:
+        ParentNode: The HTML node representing the pre/code.
+    """
+
+    text = block[4:-3]
+    children = text_to_children(text)
+    code = ParentNode("code", children)
+    return ParentNode("pre", [code])
+
+
+def heading_to_html_node(block):
+    """
+    Converts a heading block into an HTML heading node.
+
+    Args:
+        block (str): The markdown block representing the heading.
+
+    Returns:
+        ParentNode: The HTML node representing the heading.
+    """
+
+    level = len(re.match(r"^\s*#{1,6}\s", block).group().strip())
+    text = block[level + 1 :].strip()
+    children = text_to_children(text)
+    return ParentNode(f"h{level}", children)
+
+
+def paragraph_to_html_node(block):
+    """
+    Converts a paragraph block into an HTML paragraph node.
+
+    Args:
+        block (str): The markdown block representing the paragraph.
+
+    Returns:
+        ParentNode: The HTML node representing the paragraph.
+    """
+
+    lines = block.split("\n")
+    joined = " ".join(lines)
+    children = text_to_children(joined)
+    return ParentNode("p", children)

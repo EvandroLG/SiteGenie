@@ -13,7 +13,7 @@ from textnode import (
 
 def text_to_textnodes(text):
     """
-    Converts a text string into a list of TextNode objects, splitting the text into nodes for text, images, and links.
+    Converts a text string into a list of TextNode objects, splitting the text into nodes.
 
     Args:
         text (str): The input text string.
